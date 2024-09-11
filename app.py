@@ -6,7 +6,8 @@ from layouts.dilutionfridge import create_dilutionFridge_layout
 from layouts.cryocmp import create_cryocmp_layout
 from callbacks.callbacks import register_callbacks
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True,
+                url_base_pathname='/toltec_dashboard/')
 
 # Create the main layout with a vertical nav bar
 app.layout = dbc.Container([
@@ -60,4 +61,4 @@ def render_content(thermetry_clicks, dilution_fridge_clicks, cryocmp_clicks):
 register_callbacks(app)
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
