@@ -1,5 +1,6 @@
 import numpy as np
 import datetime
+import os
 
 def filter_data_by_hours(xdata, ydata, hours):
     try:
@@ -34,3 +35,14 @@ def get_data_and_labels(data, data_keys, label_mapping):
             ydata.append(data[key])
             labels.append(label_mapping.get(key, key))
     return xdata, ydata, labels
+
+def get_options_from_folder(directory, prefix):
+    files = [f for f in os.listdir(directory) if
+             os.path.isfile(os.path.join(directory, f)) and f.startswith(prefix)]
+    options = []
+    for f in files:
+        date_str = f.split('_')[1]
+        full_path = os.path.join(directory, f)
+        options.append({'label': f"{date_str}", 'value': full_path})
+    options.sort(key=lambda x: x['label'], reverse=True)
+    return options

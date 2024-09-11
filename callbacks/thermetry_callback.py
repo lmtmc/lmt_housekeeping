@@ -1,32 +1,46 @@
+import yaml
 from dash import Input, Output
 from dash.exceptions import PreventUpdate
 import plotly.graph_objs as go
-import base64
-import io
 import dash_bootstrap_components as dbc
 import traceback
 from toltec_files.thermetry_file import ToltecThermetryFile
 from utils.plot_utils import update_plot
+from utils.utils import get_options_from_folder
 
+config_path = "./config.yaml"
+with open(config_path, 'r') as stream:
+    try:
+        config = yaml.safe_load(stream)
+    except yaml.YAMLError as exc:
+        print(exc)
+
+FIXED_DIRECTORY = config['fixed_directories']['thermetry']
+
+# FIXED_DIRECTORY = "/home/lmt/data_lmt/thermetry"
 
 def thermetry_register_callbacks(app):
     @app.callback(
+        Output('thermetry-file-dropdown', 'options'),
+        Input('url', 'pathname'),
+    )
+    def update_thermetry_file_list(pathname):
+        # Get the list of files in the fixed directory
+        options = get_options_from_folder(FIXED_DIRECTORY, 'thermetry')
+        return options
+    @app.callback(
         [Output('thermetry-plot', 'figure'),
          Output('invalid-channels-thermetry', 'children')],
-        Input('upload-data-thermetry', 'contents'),
+        Input('thermetry-file-dropdown', 'value'),
         Input('hours-dropdown-thermetry', 'value'),
         Input('plot-options-thermetry', 'value'),
         Input('split-value-thermetry', 'value'),
     )
-    def update_thermetry_plot(contents, hours, options, split_value):
-        if contents is None:
+    def update_thermetry_plot(file_input, hours, options, split_value):
+        if file_input is None:
             raise PreventUpdate
-
         try:
-            content_type, content_string = contents.split(',')
-            decoded = base64.b64decode(content_string)
-            file_input = io.BytesIO(decoded)
-
+            # Read the file from the fixed directory
             thermetry_file = ToltecThermetryFile(file_input)
 
             if not hasattr(thermetry_file, 'get_plot_data'):
@@ -37,7 +51,7 @@ def thermetry_register_callbacks(app):
             if not plot_data:
                 raise ValueError("No valid plot data available")
 
-            fig = update_plot(plot_data, hours, options, split_value, watermark_labels=['1.1_0.1_top'])
+            fig = update_plot(plot_data, hours, options, split_value)
 
             invalid_channels_display = dbc.Alert(
                 f"Invalid Channels: {', '.join(invalid_channels)}" if invalid_channels else "All channels valid",

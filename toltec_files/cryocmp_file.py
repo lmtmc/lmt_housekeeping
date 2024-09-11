@@ -1,7 +1,5 @@
 from toltec_files.base_file import ToltecBaseFile
 from utils.utils import get_data_and_labels, prepare_plot_data
-
-
 class ToltecCryocmpFile(ToltecBaseFile):
     def _read_variables(self):
         try:

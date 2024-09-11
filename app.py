@@ -1,5 +1,5 @@
 import dash
-from dash import html, Output, Input, ctx
+from dash import html, Output, Input, ctx, dcc
 import dash_bootstrap_components as dbc
 from layouts.thermetry import create_thermetry_layout
 from layouts.dilutionfridge import create_dilutionFridge_layout
@@ -25,7 +25,8 @@ app.layout = dbc.Container([
         dbc.Col([
             html.Div(id="content")
         ], width=10)
-    ])
+    ]),
+    dcc.Location(id='url', refresh=False),
 ], fluid=True)
 
 

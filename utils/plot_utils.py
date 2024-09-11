@@ -1,40 +1,10 @@
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 import numpy as np
-import datetime
 
 group_gap = 100
-def add_watermark(fig, watermark_labels, ys, xs):
-    now = datetime.datetime.now()
-    watermark_index = -1
-    for i, label in enumerate(fig.data):
-        if label.name in watermark_labels:
-            watermark_index = i
-            break
-    if watermark_index >= 0:
-        y = ys[watermark_index]
-        x = xs[watermark_index]
-        if now - x[-1] > datetime.timedelta(hours=24):
-            watermark, watercolor = 'STALE', 'black'
-        else:
-            watermark = 'WARM' if y[-1] > 0.21 else 'COLD'
-            watercolor = 'red' if y[-1] > 0.21 else 'blue'
-            if y[-1] == 0:
-                watermark, watercolor = "OFF", 'black'
 
-        fig.add_annotation(
-            text=f'TolTEC {watermark}',
-            xref="paper", yref="paper",
-            x=0.5, y=0.5,
-            showarrow=False,
-            font=dict(size=40, color=watercolor),
-            opacity=0.5,
-            textangle=-30,
-            layer="above"
-        )
-    return fig
-
-def update_plot(plot_data, hours, options, split_value, watermark_labels):
+def update_plot(plot_data, hours, options, split_value):
 
     if not plot_data:
         return go.Figure().add_annotation(text="No data available for the selected time range",
@@ -107,8 +77,4 @@ def update_plot(plot_data, hours, options, split_value, watermark_labels):
     if options and 'log' in options:
         for i in range(1, num_subplots + 1):
             fig.update_yaxes(type="log", row=i, col=1, title_text="Temperature (log K)")
-
-    # Add watermark if necessary
-    fig = add_watermark(fig, watermark_labels, ys, xs)
-
     return fig

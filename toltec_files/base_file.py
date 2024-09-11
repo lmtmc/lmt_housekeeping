@@ -1,5 +1,4 @@
 import netCDF4
-import io
 import os
 
 class ToltecBaseFile:
@@ -9,10 +8,8 @@ class ToltecBaseFile:
 
         if isinstance(file_input, str) and os.path.isfile(file_input):
             self.nc = netCDF4.Dataset(file_input)
-        elif isinstance(file_input, io.BytesIO):
-            self.nc = netCDF4.Dataset('inmemory', memory=file_input.read())
         else:
-            raise ValueError("Invalid file input. Must be a valid file path or a BytesIO object.")
+            raise ValueError("Invalid file input. Must be a valid file path.")
 
         self._read_variables()
 

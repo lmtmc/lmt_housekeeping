@@ -17,7 +17,7 @@ Installation
 git clone https://github.com/lmtmc/netcdf_plot.git
 cd netcdf_plot
 python3 -m venv env
-source venv/bin/activate
+source env/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -43,7 +43,7 @@ Usage
 -----
 1. Use the vertical tabs on the left side of the dashboard to navigate between different data products.
 2. In each dashboard:
-   - Use the file upload button to upload a netCDF file.
+   - Use the file select to select a netCDF file.
    - Select the time range for data display.
    - Additional options are available for each dashboard.
 3. The data will be displayed in the form of a plot.
