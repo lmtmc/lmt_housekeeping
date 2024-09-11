@@ -1,0 +1,14 @@
+.nav-custom {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 0.5rem 0;
+    /*width: 300px;*/
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.sub-nav {
+    font-size: 1rem;
+    padding-left: 50px;
+}
