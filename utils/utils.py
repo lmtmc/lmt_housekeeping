@@ -22,6 +22,11 @@ def filter_data_by_hours(xdata, ydata, hours):
 
 def prepare_plot_data(xdata, ydata, labels, hours):
     xdata, ydata = filter_data_by_hours(xdata, ydata, hours)
+    if len(xdata) == 0 or len(ydata) == 0:
+        print("No valid data available")
+        return []
+    xdata = np.array(xdata)
+
     x_datetime = [datetime.datetime.utcfromtimestamp(ts) for ts in xdata]
     plot_data = [{'x': x_datetime, 'y': y.tolist(), 'name': label} for y, label in zip(ydata, labels)]
     return plot_data

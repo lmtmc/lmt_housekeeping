@@ -16,8 +16,9 @@ def create_dilutionFridge_layout():
                         {'label': 'All', 'value': 'all'},
                         {'label': 'Comp', 'value': 'Comp'},
                         {'label': 'Pump', 'value': 'Pump'},
-                        {'label': 'Temp', 'value': 'Temp'}]
-                    ), value='Comp')])
+                        {'label': 'Temp', 'value': 'Temp'}],
+                    value='Comp'
+                    ), )])
             ], width=3),
             dbc.Col([
                 bc.graph_component('dilutionFridge')
