@@ -4,7 +4,7 @@ import numpy as np
 
 group_gap = 100
 
-def update_plot(plot_data, hours, options, split_value):
+def update_plot(title, plot_data, hours, options, split_value):
 
     if not plot_data:
         return go.Figure().add_annotation(text="No data available for the selected time range",
@@ -61,7 +61,7 @@ def update_plot(plot_data, hours, options, split_value):
     # Update layout for group and group gap
     fig.update_layout(
         height=height,
-        title_text=f"TolTEC Thermetry - Last {hours} hours" if hours > 0 else "TolTEC Thermetry - All Data",
+        title_text=f"{title} - Last {hours} hours" if hours > 0 else "TolTEC Thermetry - All Data",
         showlegend=True,
         legend=dict(
             groupclick='toggleitem',

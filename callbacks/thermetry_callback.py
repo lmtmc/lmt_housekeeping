@@ -51,7 +51,7 @@ def thermetry_register_callbacks(app):
             if not plot_data:
                 raise ValueError("No valid plot data available")
 
-            fig = update_plot(plot_data, hours, options, split_value)
+            fig = update_plot('Thermetry', plot_data, hours, options, split_value)
 
             invalid_channels_display = dbc.Alert(
                 f"Invalid Channels: {', '.join(invalid_channels)}" if invalid_channels else "All channels valid",

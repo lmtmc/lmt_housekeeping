@@ -48,7 +48,7 @@ def dilutionfridge_register_callbacks(app):
                 raise ValueError(f"Invalid data selection: {data_selection}")
             if not plot_data:
                 raise ValueError("No valid plot data available")
-            fig = update_plot(plot_data, hours, options=None, split_value=None)
+            fig = update_plot('Dilution Fridge', plot_data, hours, options=None, split_value=None)
             return fig
 
         except Exception as e:

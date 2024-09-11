@@ -38,7 +38,7 @@ def cryocmp_register_callbacks(app):
             plot_data = cryocmp_file.getData(hours)
             if not plot_data:
                 raise ValueError("No valid plot data available")
-            fig = update_plot(plot_data, hours, options=None, split_value=None)
+            fig = update_plot('Cryocmp', plot_data, hours, options=None, split_value=None)
             return fig
 
         except Exception as e:
