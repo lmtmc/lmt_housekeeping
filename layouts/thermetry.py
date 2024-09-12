@@ -2,6 +2,7 @@ import dash_bootstrap_components as dbc
 from dash import html
 from layouts import basic_components as bc
 def create_thermetry_layout():
+
     return html.Div([
         bc.title("Thermetry Dashboard"),
         dbc.Row([

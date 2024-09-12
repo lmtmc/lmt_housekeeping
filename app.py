@@ -1,11 +1,14 @@
+# todo hold values for each page in a session store
+# todo highlight active page in the menu
+
 import dash
-from dash import html, dcc, Input, Output, State, ctx
+from dash import html, dcc, Input, Output, State
 import dash_bootstrap_components as dbc
 from layouts.thermetry import create_thermetry_layout
 from layouts.dilutionfridge import create_dilutionFridge_layout
 from layouts.cryocmp import create_cryocmp_layout
-from layouts.navbar import create_menu_bar
 from callbacks.callbacks import register_callbacks
+
 prefix = '/lmt_housekeeping'
 
 external_stylesheets = [
@@ -19,26 +22,41 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets, suppress_ca
                 url_base_pathname=f'{prefix}/')
 app.title = 'LMT Housekeeping Dashboard'
 
+def create_menu_bar(label, sub_nav_links, main_id, icon_id, dropdown_id):
+    return dbc.Nav([
+        dbc.NavLink([
+            dbc.Label(label),
+            html.Span(html.I(className='bi bi-chevron-down', id=icon_id), className='ms-2'),
+        ], id=main_id, href="#"),
+        html.Div([
+            dbc.NavLink(
+                link['label'],
+                href=link['href'],
+                id=f"{link['href'].split('/')[-1]}-link",
+                active='exact',
+                className="sub-nav"
+            )
+            for link in sub_nav_links
+        ], id=dropdown_id, style={'display': 'none'}),
+    ], vertical=True, pills=True, className='nav-custom')
+
 toltec_menu = create_menu_bar('TolTEC',
                               sub_nav_links=[
                                     {'label': 'Thermetry', 'href': f'{prefix}/thermetry'},
                                     {'label': 'Dilution Fridge', 'href': f'{prefix}/dilutionFridge'},
                                     {'label': 'Cryocmp', 'href': f'{prefix}/cryocmp'},
                               ],
-                              main_id = 'toltec-dashboard-link',
-                              icon_id = 'toltec-icon',
-                              dropdown_id = 'toltec-dropdown')
-
+                              main_id='toltec-dashboard-link',
+                              icon_id='toltec-icon',
+                              dropdown_id='toltec-dropdown')
 
 app.layout = dbc.Container([
     dbc.Row([
-        dbc.Col([
-            toltec_menu,
-
-        ], width=2),
+        dbc.Col([toltec_menu], width=2),
         dbc.Col(html.Div(id="content"))
     ]),
     dcc.Location(id='url', refresh=False),
+    dcc.Store(id='app-state', storage_type='session'),
 ], fluid=True)
 
 @app.callback(
