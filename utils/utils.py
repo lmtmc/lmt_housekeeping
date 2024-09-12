@@ -32,6 +32,7 @@ def prepare_plot_data(xdata, ydata, labels, hours):
     return plot_data
 
 def get_data_and_labels(data, data_keys, label_mapping):
+
     xdata = data.get('time', [])
     ydata = []
     labels = []

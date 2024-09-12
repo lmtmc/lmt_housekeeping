@@ -4,7 +4,7 @@ from dash.exceptions import PreventUpdate
 import plotly.graph_objs as go
 import dash_bootstrap_components as dbc
 import traceback
-from toltec_files.thermetry_file import ToltecThermetryFile
+from data_files.toltec.thermetry_file import ToltecThermetryFile
 from utils.plot_utils import update_plot
 from utils.utils import get_options_from_folder
 

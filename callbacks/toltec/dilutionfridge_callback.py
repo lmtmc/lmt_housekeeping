@@ -2,7 +2,7 @@ import yaml
 from dash import Input, Output
 from dash.exceptions import PreventUpdate
 import traceback
-from toltec_files.dilutionfridge_file import ToltecDilutionFridgeFile
+from data_files.toltec.dilutionfridge_file import ToltecDilutionFridgeFile
 from utils.plot_utils import update_plot
 from utils.utils import get_options_from_folder
 

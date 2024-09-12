@@ -26,12 +26,20 @@ Project Structure
 ```netcdf_plot/
 │
 ├── app.py
+├── assets (css, images, js)
 ├── layouts (dash layout for each dashboard)
-├── toltec_files (class to read netcdf files)
+├── data_files (class to read netcdf files)
 ├── callbacks (dash callbacks for each dashboard)
 ├── requirements.txt
 └── README.md
 ```
+Adding a new dashboard
+----------------------
+1. Create a new layout file in the layouts directory and add it to the menubar.
+2. Create a new callback file in the callbacks directory and add it to callbacks.py.
+3. Create a new class in the data_files directory to read the netCDF file.
+4. Add the new layout and callback to the app.py file.
+5. Add the new path in the config.yaml file.
 Running the application
 -----------------------
 ```

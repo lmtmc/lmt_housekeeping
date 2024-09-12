@@ -2,3 +2,6 @@ fixed_directories:
   thermetry: '/home/lmt/data_lmt/thermetry'
   dilutionFridge: '/home/lmt/data_lmt/dilutionFridge'
   cryocmp: '/home/lmt/data_lmt/cryocmp'
+  rsfend: '/home/lmt/data_lmt/rsfend'
+
+prefix: '/lmt_housekeeping'
