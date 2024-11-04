@@ -108,7 +108,7 @@ def load_all_data(id_prefix):
         cache_updated = False
 
         # Get list of .nc files
-        nc_files = [f for f in os.listdir(directory) if f.endswith('.nc') and f!=f"{id_prefix}.nc"]
+        nc_files = [f for f in os.listdir(directory) if f.endswith('.nc') and f!=f"{id_prefix}.nc" and f.is_file()]
         if not nc_files:
             print(f"No .nc files found in {directory}")
             return [], pd.Timestamp.min, pd.Timestamp.min
