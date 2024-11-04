@@ -127,7 +127,6 @@ def load_all_data(id_prefix):
                         cache_entry.get('mtime') == file_mtime and
                         all(key in cache_entry for key in ['min_time', 'max_time', 'available_days'])):
 
-                    print('Using cached data for:', file)
                     file_min_time = cache_entry['min_time']
                     file_max_time = cache_entry['max_time']
                     file_available_days = cache_entry['available_days']
@@ -186,7 +185,7 @@ def process_file(file_path):
     """Process an individual .nc file to extract min_time, max_time, and available days."""
     min_time, max_time = pd.Timestamp.max, pd.Timestamp.min
     available_days = set()
-    if 'thermetry' in file_path:
+    if 'thermetry_' in file_path:
         try:
             # Load the dataset
             ds = xr.open_dataset(file_path)
@@ -214,7 +213,7 @@ def process_file(file_path):
 
         except Exception as e:
             print(f"Error processing file {file_path}: {e}")
-    elif 'dilutionFridge' in file_path:
+    elif 'dilutionFridge_' in file_path:
         try:
             # Load the dataset
             ds = xr.open_dataset(file_path)
@@ -241,7 +240,7 @@ def process_file(file_path):
 
         except Exception as e:
             print(f"Error processing file {file_path}: {e}")
-    elif 'cryocmp' in file_path:
+    elif 'cryocmp_' in file_path:
         try:
             # Load the dataset
             ds = xr.open_dataset(file_path)
@@ -268,7 +267,7 @@ def process_file(file_path):
 
         except Exception as e:
             print(f"Error processing file {file_path}: {e}")
-    elif 'rsfend' in file_path:
+    elif 'rsfend_' in file_path:
         try:
             # Load the dataset
             ds = xr.open_dataset(file_path)

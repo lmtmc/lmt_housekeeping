@@ -28,7 +28,7 @@ def date_select(id_prefix, min_date=None, max_date=None):
 
 def time_range_dropdown(id_prefix):
     return dbc.Row([
-        dbc.Col(html.H5("Select Time:"), width='auto'),
+        dbc.Col(dbc.Label("Select Time:", className='bold-label'), width='auto'),
         dbc.Col(dbc.RadioItems(
             id=f'hours-dropdown-{id_prefix}',
             options=[
@@ -49,7 +49,7 @@ def apply_button(id_prefix):
 
 def plot_options(id_prefix):
     return dbc.Row([
-        dbc.Col(html.H5("Plot Options:", ),width='auto'),
+        dbc.Col(dbc.Label("Plot Options:", className='bold-label'),width='auto'),
         dbc.Col(dcc.Checklist(
             id=f'plot-options-{id_prefix}',
             options=[
@@ -60,7 +60,7 @@ def plot_options(id_prefix):
 
 def split_value(id_prefix):
     return dbc.Row([
-        dbc.Col(html.H5("Split Value (K):", )),
+        dbc.Col(dbc.Label("Split Value (K):", className='bold-label')),
         dbc.Col(dcc.Input(
             id=f'split-value-{id_prefix}',
             type='number',
