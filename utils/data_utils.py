@@ -83,46 +83,38 @@ def save_cache(cache, id_prefix):
 def load_all_data(id_prefix):
     """
     Load and process all .nc files in the directory, using cache when possible.
-
-    Args:
-        id_prefix: Identifier used to locate directory and cache file
-
-    Returns:
-        Tuple containing:
-        - List of disabled (unavailable) days
-        - Minimum timestamp across all files
-        - Maximum timestamp across all files
     """
-    try:
-        # Get directory path and verify it exists
-        directory = fixed_directories.get(id_prefix)
-        if not directory or not os.path.exists(directory):
-            print(f"Directory not found for {id_prefix}")
-            return [], pd.Timestamp.min, pd.Timestamp.min
+    directory = fixed_directories.get(id_prefix)
 
-        # Load existing cache or create new one
-        processed_data_cache = load_cache(id_prefix) or {}
-        # Initialize tracking variables
-        min_time, max_time = pd.Timestamp.max, pd.Timestamp.min
-        available_days=[]
-        cache_updated = False
+    # Convert directory to a Path object if it exists
+    if not directory or not Path(directory).exists():
+        print(f"Directory not found for {id_prefix}")
+        return [], pd.Timestamp.min, pd.Timestamp.min
 
-        # Get list of .nc files
-        nc_files = [f for f in os.listdir(directory) if f.endswith('.nc') and f!=f"{id_prefix}.nc" and f.is_file()]
-        if not nc_files:
-            print(f"No .nc files found in {directory}")
-            return [], pd.Timestamp.min, pd.Timestamp.min
+    directory = Path(directory)  # Ensure directory is a Path object
 
-        # Process each file
-        for file in nc_files:
-            file_path = os.path.join(directory, file)
-            if not file_path.exists():
-                print(f"File not found: {file_path}. Skipping.")
-                continue
-            file_mtime = os.path.getmtime(file_path)
-            # Check if file is in cache and cache entry is valid
-            cache_entry = processed_data_cache.get(file, {})
-            if (file in processed_data_cache and
+    processed_data_cache = load_cache(id_prefix) or {}
+    min_time, max_time = pd.Timestamp.max, pd.Timestamp.min
+    available_days = set()
+    cache_updated = False
+
+    # List all .nc files, ignoring symbolic links and non-regular files
+    nc_files = [f for f in directory.iterdir() if f.is_file() and f.suffix == '.nc' and f.name != f"{id_prefix}.nc"]
+
+    if not nc_files:
+        print(f"No .nc files found in {directory}")
+        return [], pd.Timestamp.min, pd.Timestamp.min
+
+    for file_path in nc_files:
+        if not file_path.exists():
+            print(f"File {file_path} not found. Skipping.")
+            continue
+
+        try:
+            file_mtime = file_path.stat().st_mtime
+            cache_entry = processed_data_cache.get(file_path.name, {})
+
+            if (file_path.name in processed_data_cache and
                     isinstance(cache_entry, dict) and
                     cache_entry.get('mtime') == file_mtime and
                     all(key in cache_entry for key in ['min_time', 'max_time', 'available_days'])):
@@ -130,13 +122,11 @@ def load_all_data(id_prefix):
                 file_min_time = cache_entry['min_time']
                 file_max_time = cache_entry['max_time']
                 file_available_days = cache_entry['available_days']
-            else:
-                # Process the file
-                file_min_time, file_max_time, file_available_days = process_file(file_path)
 
-                # Only update cache if we got valid data
+            else:
+                file_min_time, file_max_time, file_available_days = process_file(file_path)
                 if file_available_days:
-                    processed_data_cache[file] = {
+                    processed_data_cache[file_path.name] = {
                         'mtime': file_mtime,
                         'min_time': file_min_time,
                         'max_time': file_max_time,
@@ -144,28 +134,24 @@ def load_all_data(id_prefix):
                     }
                     cache_updated = True
 
-            # Update global tracking variables if we have valid data
             if file_available_days:
                 min_time = min(min_time, file_min_time)
                 max_time = max(max_time, file_max_time)
-                available_days.extend(file_available_days)
+                available_days.update(file_available_days)
 
-        # Save cache if it was updated
-        if cache_updated:
-            print(f'Saving updated cache for {id_prefix}')
-            save_cache(processed_data_cache, id_prefix)
+        except Exception as e:
+            print(f"Error processing file {file_path.name}: {e}")
+            continue
 
-        # Calculate disabled days
-        if min_time != pd.Timestamp.max and max_time != pd.Timestamp.min:
-            all_days = set(pd.date_range(start=min_time, end=max_time).date)
-            disabled_days = sorted(list(all_days - set(available_days)))
-        else:
-            disabled_days = []
-        return disabled_days, min_time, max_time
+    if cache_updated:
+        save_cache(processed_data_cache, id_prefix)
 
-    except Exception as e:
-        print(f"Error in load_all_data for {id_prefix}: {e}")
-        return [], pd.Timestamp.min, pd.Timestamp.min
+    disabled_days = []
+    if min_time != pd.Timestamp.max and max_time != pd.Timestamp.min:
+        all_days = set(pd.date_range(start=min_time, end=max_time).date)
+        disabled_days = sorted(all_days - available_days)
+
+    return disabled_days, min_time, max_time
 
 def process_file(file_path):
     """Process an individual .nc file to extract min_time, max_time, and available days."""
