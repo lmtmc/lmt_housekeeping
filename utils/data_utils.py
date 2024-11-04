@@ -65,18 +65,17 @@ def load_cache(id_prefix):
                 return pickle.load(f)
         except EOFError:
             print(f"Warning: Cache file {cache_file_path} is empty or corrupted. Recreating the cache.")
-            return None  # Return None to indicate cache is not available
     else:
         print(f"No cache found at {cache_file_path} or cache is empty. Recreating cache.")
-        return None
+    return None
 
 def save_cache(cache, id_prefix):
     """Save the processed data cache to disk."""
+    cache_file_path = Path(f'./cache/{id_prefix}.pkl')
     try:
-        path = Path(f'./cache/{id_prefix}.pkl')
-        with path.open('wb') as f:
+        with cache_file_path.open('wb') as f:
             pickle.dump(cache, f)
-        print(f"Cache saved to {path}")
+        print(f"Cache saved to {cache_file_path}")
     except Exception as e:
         print(f"Error saving cache: {e}")
 
@@ -116,48 +115,40 @@ def load_all_data(id_prefix):
 
         # Process each file
         for file in nc_files:
-            try:
-                file_path = os.path.join(directory, file)
-                file_mtime = os.path.getmtime(file_path)
-
-                # Check if file is in cache and cache entry is valid
-                cache_entry = processed_data_cache.get(file, {})
-                if (file in processed_data_cache and
-                        isinstance(cache_entry, dict) and
-                        cache_entry.get('mtime') == file_mtime and
-                        all(key in cache_entry for key in ['min_time', 'max_time', 'available_days'])):
-
-                    file_min_time = cache_entry['min_time']
-                    file_max_time = cache_entry['max_time']
-                    file_available_days = cache_entry['available_days']
-
-                    # Validate cached timestamps
-                    if not isinstance(file_min_time, pd.Timestamp) or not isinstance(file_max_time, pd.Timestamp):
-                        raise ValueError("Invalid timestamp data in cache")
-
-                else:
-                    # Process the file
-                    file_min_time, file_max_time, file_available_days = process_file(file_path)
-
-                    # Only update cache if we got valid data
-                    if file_available_days:
-                        processed_data_cache[file] = {
-                            'mtime': file_mtime,
-                            'min_time': file_min_time,
-                            'max_time': file_max_time,
-                            'available_days': file_available_days
-                        }
-                        cache_updated = True
-
-                # Update global tracking variables if we have valid data
-                if file_available_days:
-                    min_time = min(min_time, file_min_time)
-                    max_time = max(max_time, file_max_time)
-                    available_days.extend(file_available_days)
-
-            except Exception as e:
-                print(f"Error processing file {file}: {e}")
+            file_path = os.path.join(directory, file)
+            if not file_path.exists():
+                print(f"File not found: {file_path}. Skipping.")
                 continue
+            file_mtime = os.path.getmtime(file_path)
+            # Check if file is in cache and cache entry is valid
+            cache_entry = processed_data_cache.get(file, {})
+            if (file in processed_data_cache and
+                    isinstance(cache_entry, dict) and
+                    cache_entry.get('mtime') == file_mtime and
+                    all(key in cache_entry for key in ['min_time', 'max_time', 'available_days'])):
+
+                file_min_time = cache_entry['min_time']
+                file_max_time = cache_entry['max_time']
+                file_available_days = cache_entry['available_days']
+            else:
+                # Process the file
+                file_min_time, file_max_time, file_available_days = process_file(file_path)
+
+                # Only update cache if we got valid data
+                if file_available_days:
+                    processed_data_cache[file] = {
+                        'mtime': file_mtime,
+                        'min_time': file_min_time,
+                        'max_time': file_max_time,
+                        'available_days': file_available_days
+                    }
+                    cache_updated = True
+
+            # Update global tracking variables if we have valid data
+            if file_available_days:
+                min_time = min(min_time, file_min_time)
+                max_time = max(max_time, file_max_time)
+                available_days.extend(file_available_days)
 
         # Save cache if it was updated
         if cache_updated:
@@ -166,13 +157,8 @@ def load_all_data(id_prefix):
 
         # Calculate disabled days
         if min_time != pd.Timestamp.max and max_time != pd.Timestamp.min:
-            try:
-                all_days = set(pd.date_range(start=min_time, end=max_time).date)
-
-                disabled_days = sorted(list(all_days - set(available_days)))
-            except Exception as e:
-                print(f"Error calculating disabled days: {e}")
-                disabled_days = []
+            all_days = set(pd.date_range(start=min_time, end=max_time).date)
+            disabled_days = sorted(list(all_days - set(available_days)))
         else:
             disabled_days = []
         return disabled_days, min_time, max_time
