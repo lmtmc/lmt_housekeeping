@@ -1,6 +1,6 @@
 import netCDF4
 import os
-
+# base file class
 class ToltecBaseFile:
     def __init__(self, file_input):
         self.nc = None

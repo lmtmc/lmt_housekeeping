@@ -21,8 +21,9 @@ def create_sub_menu_bar(label, sub_nav_links, main_id, icon_id, dropdown_id, ):
                 className="sub-nav"
             )
             for link in sub_nav_links
-        ], id=dropdown_id, style={'display': 'none'}),
-    ], vertical=True, pills=True, className='nav-custom')
+        ], id=dropdown_id,
+            style={'display': 'block'}),
+    ], vertical=True, pills=True, className='nav-custom',)
 
 toltec_menu = create_sub_menu_bar('TolTEC',
                               sub_nav_links=[
@@ -42,4 +43,4 @@ rsr_menu = create_sub_menu_bar('RSR',
                           dropdown_id='rsr-dropdown')
 
 def create_menu_bar():
-    return [toltec_menu, rsr_menu]
+    return dbc.Card(dbc.CardBody([toltec_menu, rsr_menu]),style={'height': '90vh', 'overflow-y': 'auto'})

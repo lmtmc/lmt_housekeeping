@@ -23,14 +23,17 @@ external_stylesheets = [
 ]
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets, suppress_callback_exceptions=True,
-                url_base_pathname=f'{prefix}/')
+                routes_pathname_prefix=f'{prefix}/', requests_pathname_prefix=f'{prefix}/',
+                )
+app.config.prevent_initial_callbacks = 'initial_duplicate'
+
 app.title = 'LMT Housekeeping Dashboard'
 
 
 app.layout = dbc.Container([
     dbc.Row([
-        dbc.Col(menubar.create_menu_bar(), width=2),
-        dbc.Col(html.Div(id="content"))
+        dbc.Col(menubar.create_menu_bar(),width=2),
+        dbc.Col(html.Div(id="content"), width = 9)
     ]),
     dcc.Location(id='url', refresh=False),
     dcc.Store(id='app-state', storage_type='session'),
@@ -55,6 +58,8 @@ def render_content(pathname):
     return get_layout(pathname)
 
 register_callbacks(app)
+
+server = app.server
 
 if __name__ == '__main__':
     app.run_server(debug=True)
