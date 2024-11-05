@@ -75,7 +75,7 @@ def dilutionfridge_register_callbacks(app):
 
         files = get_files('dilutionFridge', hours, start_date, end_date)
         data = []
-
+        plot_data = []
         try:
             for file in files:
                 file_path = os.path.join(FIXED_DIRECTORY, file)

@@ -71,7 +71,7 @@ def rsfend_register_callbacks(app):
             raise PreventUpdate
         files = get_files('rsfend', hours, start_date, end_date)
         data = []
-
+        plot_data = []
         try:
             for file in files:
                 file_path = os.path.join(FIXED_DIRECTORY, file)

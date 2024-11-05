@@ -97,7 +97,6 @@ def load_all_data(id_prefix):
 
     # List all .nc files, ignoring symbolic links and non-regular files
     nc_files = [f for f in Path(directory).glob('*.nc') if f.is_file() and f.name!=f'{id_prefix}.nc']
-
     if not nc_files:
         print(f"No .nc files found in {directory}")
         return [], pd.Timestamp.min, pd.Timestamp.min
@@ -121,7 +120,7 @@ def load_all_data(id_prefix):
                 file_available_days = cache_entry['available_days']
 
             else:
-                file_min_time, file_max_time, file_available_days = process_file(file_path)
+                file_min_time, file_max_time, file_available_days = process_file(str(file_path))
                 if file_available_days:
                     processed_data_cache[file_path.name] = {
                         'mtime': file_mtime,
@@ -274,8 +273,7 @@ def process_file(file_path):
 # return a list containing the file names
 def get_files(id_prefix, hours, start_date, end_date):
     # Load existing cache (if any)
-    processed_data_cache = load_cache(id_prefix)
-
+    processed_data_cache = load_cache(id_prefix) or {}
     # if hours is 0 then the start_date and end_date are dates from the date picker, else date is more max_time
     if hours == 0:
         start_date = pd.Timestamp(start_date).date()
