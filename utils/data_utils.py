@@ -85,13 +85,10 @@ def load_all_data(id_prefix):
     Load and process all .nc files in the directory, using cache when possible.
     """
     directory = fixed_directories.get(id_prefix)
-
     # Convert directory to a Path object if it exists
     if not directory or not Path(directory).exists():
         print(f"Directory not found for {id_prefix}")
         return [], pd.Timestamp.min, pd.Timestamp.min
-
-    directory = Path(directory)  # Ensure directory is a Path object
 
     processed_data_cache = load_cache(id_prefix) or {}
     min_time, max_time = pd.Timestamp.max, pd.Timestamp.min
@@ -99,7 +96,7 @@ def load_all_data(id_prefix):
     cache_updated = False
 
     # List all .nc files, ignoring symbolic links and non-regular files
-    nc_files = [f for f in directory.iterdir() if f.is_file() and f.suffix == '.nc' and f.name != f"{id_prefix}.nc"]
+    nc_files = [f for f in Path(directory).glob('*.nc') if f.is_file() and f.name!=f'{id_prefix}.nc']
 
     if not nc_files:
         print(f"No .nc files found in {directory}")
