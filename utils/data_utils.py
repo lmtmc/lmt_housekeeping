@@ -1,14 +1,11 @@
 from pathlib import Path
-from typing import Set
-
-import numpy as np
-import datetime
 import os
 import pandas as pd
 import yaml
 import xarray as xr
 import pickle
 config_path = "./config.yaml"
+
 def load_config(config_path):
     try:
         with open(config_path, 'r') as stream:
@@ -153,120 +150,50 @@ def process_file(file_path):
     """Process an individual .nc file to extract min_time, max_time, and available days."""
     min_time, max_time = pd.Timestamp.max, pd.Timestamp.min
     available_days = set()
-    if 'thermetry_' in file_path:
-        try:
-            # Load the dataset
-            ds = xr.open_dataset(file_path)
 
-            # Iterate over all 16 channels (assuming time variables are Time1, Time2, ..., Time16)
-            for i in range(1, 17):
-                time_var = f'Data.ToltecThermetry.Time{i}'
-                if time_var in ds.variables:
-                    # get data where time is greater than 0
-                    time_data = ds[time_var].values
-                    time_data = time_data[time_data > 0]
+    try:
+        # Load the dataset
+        with xr.open_dataset(file_path) as ds:
+            # Identify file type and corresponding time variable and channels
+            if 'thermetry_' in file_path:
+                min_time, max_time, available_days = _process_data(ds, 'Data.ToltecThermetry.Time', 16)
+            elif 'dilutionFridge_' in file_path:
+                min_time, max_time, available_days = _process_data(ds, 'Data.ToltecDilutionFridge.SampleTime')
+            elif 'cryocmp_' in file_path:
+                min_time, max_time, available_days = _process_data(ds, 'Data.ToltecCryocmp.Time')
+            elif 'rsfend_' in file_path:
+                min_time, max_time, available_days = _process_data(ds, 'Data.Rsfend.Time')
+            else:
+                print(f"Unsupported file type: {file_path}")
 
-                    if len(time_data) == 0:
-                        continue  # Skip if no data for this channel
-
-                    # Convert to pandas datetime
-                    timestamps = pd.to_datetime(time_data, unit='s')
-
-                    # Update min and max time for this channel
-                    min_time = min(min_time, timestamps.min())
-                    max_time = max(max_time, timestamps.max())
-
-                    # Normalize timestamps to date and update available days
-                    available_days.update(timestamps.normalize().date)
-
-        except Exception as e:
-            print(f"Error processing file {file_path}: {e}")
-
-    elif 'dilutionFridge_' in file_path:
-        try:
-            # Load the dataset
-            ds = xr.open_dataset(file_path)
-
-            # Get the time variable
-            time_var = 'Data.ToltecDilutionFridge.SampleTime'
-            if time_var in ds.variables:
-                # get data where time is greater than 0
-                time_data = ds[time_var].values
-                time_data = time_data[time_data > 0]
-
-                if len(time_data) == 0:
-                    return min_time, max_time, available_days  # Skip if no data
-
-                # Convert to pandas datetime
-                timestamps = pd.to_datetime(time_data, unit='s')
-
-                # Update min and max time
-                min_time = timestamps.min()
-                max_time = timestamps.max()
-
-                # Normalize timestamps to date and update available days
-                available_days.update(timestamps.normalize().date)
-
-        except Exception as e:
-            print(f"Error processing file {file_path}: {e}")
-    elif 'cryocmp_' in file_path:
-        try:
-            # Load the dataset
-            ds = xr.open_dataset(file_path)
-
-            # Get the time variable
-            time_var = 'Data.ToltecCryocmp.Time'
-            if time_var in ds.variables:
-
-                # get data where time is greater than 0
-                time_data = ds[time_var].values
-                time_data = time_data[time_data > 0]
-
-                if len(time_data) == 0:
-                    return min_time, max_time, available_days  # Skip if no data
-
-                # Convert to pandas datetime
-                timestamps = pd.to_datetime(time_data, unit='s')
-
-                # Update min and max time
-                min_time = min(min_time, timestamps.min())
-                max_time = max(max_time, timestamps.max())
-                # Normalize timestamps to date and update available days
-                available_days.update(timestamps.normalize().date)
-
-        except Exception as e:
-            print(f"Error processing file {file_path}: {e}")
-    elif 'rsfend_' in file_path:
-        try:
-            # Load the dataset
-            ds = xr.open_dataset(file_path)
-
-            # Get the time variable
-            time_var = 'Data.Rsfend.Time'
-            if time_var in ds.variables:
-                # get data where time is greater than 0
-                time_data = ds[time_var].values
-                time_data = time_data[time_data > 0]
-
-                if len(time_data) == 0:
-                    return min_time, max_time, available_days  # Skip if no data
-
-                # Convert to pandas datetime
-                timestamps = pd.to_datetime(time_data, unit='s')
-
-                # Update min and max time
-                min_time = min(min_time, timestamps.min())
-                max_time = max(max_time, timestamps.max())
-
-                # Normalize timestamps to date and update available days
-                available_days.update(timestamps.normalize().date)
-
-        except Exception as e:
-            print(f"Error processing file {file_path}: {e}")
-    else:
-        print(f"Unsupported file type: {file_path}")
+    except Exception as e:
+        print(f"Error processing file {file_path}: {e}")
 
     return min_time, max_time, available_days
+
+def _process_data(ds, time_var_base, num_channels=1):
+    """Generalized function to process data and extract min_time, max_time, and available days."""
+    min_time, max_time = pd.Timestamp.max, pd.Timestamp.min
+    available_days = set()
+
+    # For thermetry data, we loop through each channel, otherwise num_channels is 1
+    for i in range(1, num_channels + 1):
+        time_var = f'{time_var_base}{i}' if num_channels > 1 else time_var_base
+        if time_var in ds.variables:
+            time_data = ds[time_var].values
+            time_data = time_data[time_data > 0]  # Filter non-positive times
+
+            if len(time_data) == 0:
+                continue  # Skip if no data for this channel
+
+            # Convert to datetime, calculate min, max times, and update available days
+            timestamps = pd.to_datetime(time_data, unit='s')
+            min_time = min(min_time, timestamps.min())
+            max_time = max(max_time, timestamps.max())
+            available_days.update(timestamps.normalize().date)
+
+    return min_time, max_time, available_days
+
 
 # if start_date == end_date get all the files that contain the start_date
 # if start_date != end_date get all the files that has available date between the start_date and end_date
