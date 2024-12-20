@@ -84,7 +84,8 @@ class ToltecThermetryFile(ToltecBaseFile):
                 max_time = max(max_time, df.index.max())
                 min_time = min(min_time, df.index.min())
 
-        return min_time, max_time
+        return min_time.date(), max_time.date()
+
 
     def get_plot_data(self, hours, start_date, end_date):
         """Get plot data with optimized time range filtering"""

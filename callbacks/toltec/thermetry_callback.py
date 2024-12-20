@@ -39,6 +39,7 @@ def thermetry_register_callbacks(app):
         # Part 2: Set disabled days and date range based on data
         if _thermetry_cached_data is None:
             disabled_dates, min_date, max_date = load_all_data('thermetry')
+            print('min_date from cached_data', min_date, 'max_date', max_date)
             _thermetry_cached_data = (disabled_dates, min_date, max_date)
         else:
             disabled_dates, min_date, max_date = _thermetry_cached_data
@@ -54,8 +55,7 @@ def thermetry_register_callbacks(app):
         start_date = max(min_date, previous_day)
 
         return style, disabled_dates, start_date, max_date, min_date, max_date
-
-
+    #
     @app.callback(
         [
             Output('thermetry-plot', 'figure'),
@@ -123,3 +123,102 @@ def thermetry_register_callbacks(app):
             error_fig = go.Figure().add_annotation(text=error_message, showarrow=False, font=dict(size=20, color="red"))
             error_alert = dbc.Alert(error_message, color="danger")
             return error_fig, error_alert
+    # @app.callback(
+    #     [
+    #         Output('thermetry-plot', 'figure'),
+    #         Output('invalid-channels-thermetry', 'children')
+    #     ],
+    #     Input('thermetry-apply-btn', 'n_clicks'),
+    #     [
+    #         State('thermetry-date-picker-range', 'start_date'),
+    #         State('thermetry-date-picker-range', 'end_date'),
+    #         State('hours-dropdown-thermetry', 'value'),
+    #         State('plot-options-thermetry', 'value'),
+    #         State('split-value-thermetry', 'value'),
+    #     ],
+    # )
+    # def update_thermetry_plot(n, start_date, end_date, hours, options, split_value):
+    #     if n is None:
+    #         raise PreventUpdate
+    #
+    #     try:
+    #         files = get_files('thermetry', hours, start_date, end_date)
+    #         if not files:
+    #             return (
+    #                 go.Figure().add_annotation(
+    #                     text="No files found for the selected date range",
+    #                     showarrow=False,
+    #                     font=dict(size=20, color="red")
+    #                 ),
+    #                 dbc.Alert("No data available", color="warning")
+    #             )
+    #
+    #         data = []
+    #         potentially_invalid_channels = set()
+    #         verified_valid_channels = set()
+    #         processed_files = 0
+    #
+    #         for file in files:
+    #             try:
+    #                 file_path = os.path.join(FIXED_DIRECTORY, file)
+    #                 thermetry_file = ToltecThermetryFile(file_path)
+    #
+    #                 # Add timestamp validation in get_plot_data method
+    #                 file_plot_data, file_invalid_channels = thermetry_file.get_plot_data(
+    #                     hours, start_date, end_date,
+    #                 )
+    #
+    #                 if file_plot_data:
+    #                     data.extend(file_plot_data)
+    #                     processed_files += 1
+    #
+    #                     # Track valid and invalid channels
+    #                     valid_channels = set(df['name'] for df in file_plot_data)
+    #                     verified_valid_channels.update(valid_channels)
+    #                     potentially_invalid_channels.update(file_invalid_channels)
+    #                     potentially_invalid_channels.difference_update(valid_channels)
+    #
+    #             except Exception as file_error:
+    #                 print(f"Error processing file {file}: {str(file_error)}")
+    #                 continue
+    #
+    #         if not data:
+    #             return (
+    #                 go.Figure().add_annotation(
+    #                     text="No valid data found in the processed files",
+    #                     showarrow=False,
+    #                     font=dict(size=20, color="red")
+    #                 ),
+    #                 dbc.Alert("No valid data available", color="warning")
+    #             )
+    #
+    #         # Generate plot with accumulated data
+    #         fig = update_plot('Thermetry', data, hours, options, split_value)
+    #
+    #         # Create status message
+    #         final_invalid_channels = potentially_invalid_channels - verified_valid_channels
+    #         status_message = []
+    #         if processed_files > 0:
+    #             status_message.append(f"Successfully processed {processed_files} files")
+    #         if final_invalid_channels:
+    #             status_message.append(f"Invalid channels: {', '.join(sorted(final_invalid_channels))}")
+    #
+    #         status_alert = dbc.Alert(
+    #             " | ".join(status_message),
+    #             color="success" if not final_invalid_channels else "warning"
+    #         )
+    #
+    #         return fig, status_alert
+    #
+    #     except Exception as e:
+    #         error_message = f"Error: {str(e)}"
+    #         print(error_message)
+    #         print(traceback.format_exc())
+    #
+    #         error_fig = go.Figure().add_annotation(
+    #             text=error_message,
+    #             showarrow=False,
+    #             font=dict(size=20, color="red")
+    #         )
+    #         error_alert = dbc.Alert(error_message, color="danger")
+    #         return error_fig, error_alert
