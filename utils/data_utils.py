@@ -26,9 +26,9 @@ def load_config(config_path):
         print(exc)
         return None
 
-# config = load_config(config_path)
-# fixed_directories = config['fixed_directories']
-fixed_directories = {'thermetry': '/home/lmt/data_lmt/thermetry', 'dilutionFridge': '/home/lmt/data_lmt/dilutionFridge', 'cryocmp': '/home/lmt/data_lmt/cryocmp', 'rsfend': '/home/lmt/data_lmt/rsfend'}
+config = load_config(config_path)
+fixed_directories = config['fixed_directories']
+#fixed_directories = {'thermetry': '/home/lmt/data_lmt/thermetry', 'dilutionFridge': '/home/lmt/data_lmt/dilutionFridge', 'cryocmp': '/home/lmt/data_lmt/cryocmp', 'rsfend': '/home/lmt/data_lmt/rsfend'}
 def filter_dataframe_by_time(df, hours=0, start_date=None, end_date=None):
     """
     Filters a DataFrame by the most recent hours or a specified date range.
